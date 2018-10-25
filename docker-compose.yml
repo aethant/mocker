@@ -1,0 +1,51 @@
+version: "2"
+services:
+  mockjwt:
+    environment:
+      NODE_ENV: development
+      TZ: "America/Chicago"
+    build:
+      context: ./mockjwt
+    networks:
+      - front
+      - back
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+  gql:
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: development
+      TZ: "America/Chicago"
+    build:
+      context: ./gql
+    networks:
+      - front
+      - back
+    ports:
+      - "8002:8002"
+    expose:
+      - "8002"
+  mongo:
+    environment:
+      NODE_ENV: development
+      TZ: "America/Chicago"
+    build:
+      context: ./db
+    volumes:
+      - $HOME/gameplan/data:/data
+    networks:
+      - back
+    ports:
+      - "27017:27017"
+      - "27018:27018"
+    expose:
+      - "27017"
+    # command: --smallfiles --rest --httpinterface
+networks:
+  front:
+    driver: bridge
+  back:
+    driver: bridge
