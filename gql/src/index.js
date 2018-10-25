@@ -4,6 +4,8 @@ import expressHandlebars from "express-handlebars"
 import path from "path"
 import winston from "winston"
 import graphql from "./gq.js"
+import mongoose from "mongoose"
+import GenerateMockDataRouter from "./datamock"
 
 const server = express()
 
@@ -54,6 +56,18 @@ server.options("*", (_, res) => {
   res.send(200)
 })
 
+server.use(GenerateMockDataRouter)
 server.use("/graphql", graphql)
 
-server.listen(8002, () => console.log("Mock GraphQL listening on :8002"))
+server.listen(8002, () => {
+  console.log("Mock GraphQL listening on :8002")
+  mongoose.connect(
+    "mongodb://mongo/mock",
+    { useNewUrlParser: true }
+  )
+  const db = mongoose.connection
+  db.on("error", err => console.error({ err }))
+  db.once("open", () => {
+    console.info("MongoDB connection created.")
+  })
+})
