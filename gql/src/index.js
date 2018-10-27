@@ -57,17 +57,17 @@ server.options("*", (_, res) => {
 })
 
 server.use(GenerateMockDataRouter)
-server.use("/graphql", graphql)
+server.use(graphql)
 
 server.listen(8002, () => {
   console.log("Mock GraphQL listening on :8002")
   mongoose.connect(
-    "mongodb://mongo/mock",
+    "mongodb://localhost/mock",
     { useNewUrlParser: true }
   )
   const db = mongoose.connection
   db.on("error", err => console.error({ err }))
   db.once("open", () => {
-    console.info("MongoDB connection created.")
+    console.info("MongoDB connection created!")
   })
 })
