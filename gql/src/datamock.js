@@ -87,11 +87,13 @@ r.get("/delete/athletes", (req, res) => {
 r.get("/generate/user", (req, res) => {
   const User = mongoose.model("User", userSchema)
   const user = new User({
+    id: 1,
     name: {
       login: "test",
       first: "John",
       last: "Smith",
     },
+    sport: 2,
     email: "test@example.org",
     school: {
       name: "Hardknocks",
@@ -100,6 +102,9 @@ r.get("/generate/user", (req, res) => {
     events: {
       tracking: [],
       attending: [],
+    },
+    athletes: {
+      tagged: [{ id: 8, tag: 2 }],
     },
   })
 

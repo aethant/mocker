@@ -53,4 +53,7 @@ export default new Schema({
   profile_picture: {
     type: String,
   },
+  jersey: {
+    type: Number,
+  },
 })

@@ -8,6 +8,8 @@ import {
 import mongoose from "mongoose"
 import eventsSchema from "../schema/events"
 import event from "./event"
+import userSchema from "../schema/user"
+import userType from "./user"
 
 export default new GraphQLObjectType({
   name: "Athlete",
@@ -52,12 +54,14 @@ export default new GraphQLObjectType({
     twitter: {
       type: GraphQLString,
     },
+    jersey: {
+      type: GraphQLInt,
+    },
     events: {
       type: new GraphQLList(event),
       description: "Events associated with this athlete",
       resolve: ({ events }, args) => {
         const Event = mongoose.model("Events", eventsSchema)
-
         const filters = Object.keys(args).reduce((aggregator, key) => {
           return key !== "page" && key !== "perPage"
             ? {
@@ -78,6 +82,21 @@ export default new GraphQLObjectType({
     },
     profile_picture: {
       type: GraphQLString,
+    },
+    tag: {
+      type: GraphQLInt,
+      description: "User assigned tag value",
+      resolve: async ({ id }, args, { user: { username } }) => {
+        const User = mongoose.model("User", userSchema)
+
+        const userData = await User.findOne({
+          "name.login": username,
+        }).lean()
+
+        const { tag = 0 } = userData.athletes.tagged.find(v => v.id === id) || 0
+
+        return tag
+      },
     },
   }),
 })

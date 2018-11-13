@@ -1,6 +1,10 @@
 import { Schema } from "mongoose"
 
 export default new Schema({
+  id: {
+    type: Number,
+    unique: true,
+  },
   name: {
     login: {
       type: String,
@@ -14,6 +18,10 @@ export default new Schema({
       type: String,
       required: true,
     },
+  },
+  sport: {
+    type: Number,
+    required: true,
   },
   email: {
     type: String,
@@ -35,6 +43,18 @@ export default new Schema({
     attending: {
       type: Array,
       default: [],
+    },
+  },
+  athletes: {
+    tagged: {
+      type: Array,
+      default: [],
+    },
+  },
+  preferences: {
+    bypassAttendanceConfirmation: {
+      type: Boolean,
+      default: false,
     },
   },
 })

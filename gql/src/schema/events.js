@@ -44,4 +44,7 @@ export default new Schema({
     type: String,
     required: true,
   },
+  sport: {
+    type: Number,
+  },
 })
