@@ -5,10 +5,18 @@ import {
   GraphQLList,
   GraphQLBoolean,
 } from "graphql"
-import mongoose from "mongoose"
-import athleteSchema from "../schema/athletes"
-import athleteType from "./athlete"
+import Athlete from "../schema/athletes"
 import athletesResponseType from "./athleteResponse"
+
+const searchTextFilter = val =>
+  val.length === 0
+    ? null
+    : {
+        $or: [
+          { first_name: { $regex: val, $options: "i" } },
+          { last_name: { $regex: val, $options: "i" } },
+        ],
+      }
 
 export default new GraphQLObjectType({
   name: "Event",
@@ -70,11 +78,14 @@ export default new GraphQLObjectType({
         perPage: {
           type: GraphQLInt,
         },
+        searchText: {
+          type: GraphQLString,
+          description: "Text to search for inside althete names",
+        },
       },
       description: "Athletes associated with this event",
-      resolve: ({ id: eventId }, args) => {
-        const Athlete = mongoose.model("Athletes", athleteSchema)
-        const { page = 1, perPage } = args
+      resolve: async ({ id: eventId }, args) => {
+        const { page = 1, perPage, searchText } = args
         const pagination =
           page && perPage
             ? {
@@ -85,6 +96,12 @@ export default new GraphQLObjectType({
 
         const filters = Object.keys(args).reduce(
           (aggregator, key) => {
+            if (key === "searchText") {
+              return {
+                ...aggregator,
+                ...searchTextFilter(args[key]),
+              }
+            }
             return key !== "page" && key !== "perPage"
               ? {
                   ...aggregator,
@@ -103,6 +120,7 @@ export default new GraphQLObjectType({
         const countAtEvent = Athlete.find({ events: eventId })
           .count()
           .lean()
+
         const filtered = Athlete.find({ ...filters })
           .count()
           .lean()

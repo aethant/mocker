@@ -17,8 +17,6 @@ import eventType from "./types/event"
 import eventsResponseType from "./types/eventReponse"
 import userSchema from "./schema/user"
 import userType from "./types/user"
-import athletesSchema from "./schema/athletes"
-import eventReponse from "./types/eventReponse"
 
 const dateFilters = (start, end) => ({
   start_date: start
@@ -47,7 +45,6 @@ const rootQuery = new GraphQLObjectType({
         },
       },
       resolve: async (_, args, { user }) => {
-        const Athlete = mongoose.model("Athletes", athletesSchema)
         const { page = 1, perPage } = args
         const pagination =
           page && perPage
@@ -271,7 +268,6 @@ const rootMutation = new GraphQLObjectType({
         },
       },
       resolve: async (_, { id, tag }, { user }) => {
-        const Athlete = mongoose.model("Athletes", athletesSchema)
         const User = mongoose.model("User", userSchema)
         return User.findOne({
           "name.login": user.username,
