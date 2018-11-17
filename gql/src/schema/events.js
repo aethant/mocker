@@ -1,6 +1,8 @@
-import { Schema } from "mongoose"
+import mongoose from "mongoose"
 
-export default new Schema({
+const { Schema } = mongoose
+
+const eventSchema = new Schema({
   id: {
     type: Number,
     required: true,
@@ -48,3 +50,6 @@ export default new Schema({
     type: Number,
   },
 })
+
+const Event = mongoose.model("Events", eventSchema)
+export default Event

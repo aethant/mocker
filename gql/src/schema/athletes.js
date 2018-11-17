@@ -1,6 +1,8 @@
 import mongoose from "mongoose"
 
-const AthleteSchema = new mongoose.Schema(
+const { Schema } = mongoose
+
+const AthleteSchema = new Schema(
   {
     id: {
       type: Number,

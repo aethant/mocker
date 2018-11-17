@@ -1,6 +1,8 @@
-import { Schema } from "mongoose"
+import mongoose from "mongoose"
 
-export default new Schema({
+const { Schema } = mongoose
+
+const userSchema = new Schema({
   id: {
     type: Number,
     unique: true,
@@ -50,6 +52,10 @@ export default new Schema({
       type: Array,
       default: [],
     },
+    notes: {
+      type: Object,
+      default: {},
+    },
   },
   preferences: {
     bypassAttendanceConfirmation: {
@@ -58,3 +64,38 @@ export default new Schema({
     },
   },
 })
+
+// retrieve list of athletes tagged by user with a given tag or tags
+userSchema.statics.taggedAs = async function taggedAs(id, tag) {
+  return await this.findOne({
+    "name.login": id,
+  }).then(user => {
+    const tags = user.athletes.tagged.filter(el => tag.includes(el.tag))
+    return tags.map(tag => tag.id)
+  })
+}
+
+// retrieve athlete ids of athletes user has written notes on
+userSchema.statics.hasNotes = async function hasNotes(id, athleteId) {
+  return await this.findOne({
+    "name.login": id,
+  }).then(user => {
+    const { athletes: { notes = {} } = {} } = user
+
+    if (athleteId) {
+      // if a specific athlete id is provided, check if the user wrote notes about that specific athlete
+      return notes[athleteId] && Boolean(Object.keys(notes[athleteId]).length)
+    }
+
+    // otherwise, check all athletes in the notes object
+    const athleteIds = Object.keys(notes)
+    const athletesIdsWithContent = athleteIds.filter(key =>
+      Boolean(Object.keys(notes[key]).length)
+    )
+
+    return athletesIdsWithContent.map(v => parseInt(v, 10)) || []
+  })
+}
+
+const User = mongoose.model("User", userSchema)
+export default User

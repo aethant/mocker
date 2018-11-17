@@ -5,9 +5,9 @@ import fetch from "node-fetch"
 import EventData from "./data/events"
 import AthletesData from "./data/athletes"
 
-import eventSchema from "./schema/events"
-import userSchema from "./schema/user"
-import athleteSchema from "./schema/athletes"
+import Event from "./schema/events"
+import User from "./schema/user"
+import Athlete from "./schema/athletes"
 
 import parse from "date-fns/parse"
 import getTime from "date-fns/get_time"
@@ -15,7 +15,6 @@ import getTime from "date-fns/get_time"
 const r = new Router()
 
 r.get("/generate/events", (req, res) => {
-  const Event = mongoose.model("Events", eventSchema)
   EventData.forEach(event => {
     const evt = new Event({
       ...event,
@@ -36,7 +35,6 @@ r.get("/generate/events", (req, res) => {
 })
 
 r.get("/generate/athletes", (req, res) => {
-  const Athlete = mongoose.model("Athletes", athleteSchema)
   return fetch("https://randomuser.me/api/?results=1000&inc=picture")
     .then(resp => resp.json())
     .then(({ results: pics }) => {
@@ -73,19 +71,16 @@ r.get("/generate/athletes", (req, res) => {
 })
 
 r.get("/delete/events", (req, res) => {
-  const Event = mongoose.model("Events", eventSchema)
   Event.collection.remove({})
   return res.sendStatus(200)
 })
 
 r.get("/delete/athletes", (req, res) => {
-  const Athlete = mongoose.model("Athletes", athleteSchema)
   Athlete.collection.remove({})
   return res.sendStatus(200)
 })
 
 r.get("/generate/user", (req, res) => {
-  const User = mongoose.model("User", userSchema)
   const user = new User({
     id: 1,
     name: {
@@ -104,7 +99,13 @@ r.get("/generate/user", (req, res) => {
       attending: [],
     },
     athletes: {
-      tagged: [{ id: 8, tag: 2 }],
+      tagged: [],
+      notes: {
+        8: {
+          1542378916: { content: "Foo" },
+        },
+        10: {},
+      },
     },
   })
 

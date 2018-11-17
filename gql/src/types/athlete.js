@@ -5,11 +5,10 @@ import {
   GraphQLList,
   GraphQLFloat,
 } from "graphql"
-import mongoose from "mongoose"
-import eventsSchema from "../schema/events"
+
+import Event from "../schema/events"
 import event from "./event"
-import userSchema from "../schema/user"
-import userType from "./user"
+import User from "../schema/user"
 
 export default new GraphQLObjectType({
   name: "Athlete",
@@ -61,7 +60,6 @@ export default new GraphQLObjectType({
       type: new GraphQLList(event),
       description: "Events associated with this athlete",
       resolve: ({ events }, args) => {
-        const Event = mongoose.model("Events", eventsSchema)
         const filters = Object.keys(args).reduce((aggregator, key) => {
           return key !== "page" && key !== "perPage"
             ? {
@@ -87,8 +85,6 @@ export default new GraphQLObjectType({
       type: GraphQLInt,
       description: "User assigned tag value",
       resolve: async ({ id }, args, { user: { username } }) => {
-        const User = mongoose.model("User", userSchema)
-
         const userData = await User.findOne({
           "name.login": username,
         }).lean()

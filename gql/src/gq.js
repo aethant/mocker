@@ -8,14 +8,15 @@ import {
   GraphQLBoolean,
   GraphQLList,
 } from "graphql"
-import mongoose from "mongoose"
 import uniq from "lodash/uniq"
 
-import eventSchema from "./schema/events"
 import athletesType from "./types/athlete"
 import eventType from "./types/event"
 import eventsResponseType from "./types/eventReponse"
-import userSchema from "./schema/user"
+
+import Event from "./schema/events"
+import User from "./schema/user"
+import Athlete from "./schema/athletes"
 import userType from "./types/user"
 
 const dateFilters = (start, end) => ({
@@ -95,8 +96,6 @@ const rootQuery = new GraphQLObjectType({
       },
       resolve: async (_, args, { user }) => {
         const { id } = args
-        const Event = mongoose.model("Events", eventSchema)
-        const User = mongoose.model("User", userSchema)
         const userData = await User.findOne({
           "name.login": user.username,
         }).lean()
@@ -144,8 +143,6 @@ const rootQuery = new GraphQLObjectType({
         },
       },
       resolve: async (_, args, { user }) => {
-        const Event = mongoose.model("Events", eventSchema)
-        const User = mongoose.model("User", userSchema)
         const userData = await User.findOne({
           "name.login": user.username,
         }).lean()
@@ -243,7 +240,6 @@ const rootQuery = new GraphQLObjectType({
     user: {
       type: userType,
       resolve: (_, args, { user }) => {
-        const User = mongoose.model("User", userSchema)
         return User.findOne({ "name.login": user.username }).lean()
       },
     },
@@ -268,27 +264,32 @@ const rootMutation = new GraphQLObjectType({
         },
       },
       resolve: async (_, { id, tag }, { user }) => {
-        const User = mongoose.model("User", userSchema)
         return User.findOne({
           "name.login": user.username,
         }).then(async user => {
           const { athletes: { tagged = [] } = {} } = user
 
           const tags = tagged.filter(v => v.id !== id)
-          user.set({
-            athletes: {
-              tagged: [
-                ...tags,
-                {
+          const updatedTag =
+            tag > 0
+              ? {
                   id,
                   tag,
-                },
-              ],
+                }
+              : null
+
+          const updatedTagged = [...tags, updatedTag].filter(Boolean)
+          console.log({ updatedTagged })
+          user.set({
+            athletes: {
+              tagged: updatedTagged,
             },
           })
 
           const updatedUser = await user.save()
-          const response = updatedUser.athletes.tagged.find(v => v.id === id)
+          const response = updatedUser.athletes.tagged.find(
+            v => v.id === id
+          ) || { id, tag: 0 }
 
           return {
             ...response,
@@ -306,7 +307,6 @@ const rootMutation = new GraphQLObjectType({
         },
       },
       resolve: (_, args, { user: { username } }) => {
-        const User = mongoose.model("User", userSchema)
         return User.findOne({ "name.login": username }).then(async user => {
           if ("bypassAttendanceConfirmation" in args) {
             user.set({
@@ -334,9 +334,6 @@ const rootMutation = new GraphQLObjectType({
         },
       },
       resolve: (_, { eventId, interaction }, { user: { username } }) => {
-        const User = mongoose.model("User", userSchema)
-        const Event = mongoose.model("Events", eventSchema)
-
         return User.findOne({ "name.login": username }).then(async user => {
           const {
             events: {
@@ -399,9 +396,6 @@ const rootMutation = new GraphQLObjectType({
         },
       },
       resolve: (_, { eventId, trackingState }, { user: { username } }) => {
-        const User = mongoose.model("User", userSchema)
-        const Event = mongoose.model("Events", eventSchema)
-
         return User.findOne({ "name.login": username }).then(async user => {
           const { events: { tracking, attending } = {} } = user
 

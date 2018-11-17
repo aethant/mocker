@@ -7,6 +7,7 @@ import {
 } from "graphql"
 import Athlete from "../schema/athletes"
 import athletesResponseType from "./athleteResponse"
+import User from "../schema/user"
 
 const searchTextFilter = val =>
   val.length === 0
@@ -82,10 +83,19 @@ export default new GraphQLObjectType({
           type: GraphQLString,
           description: "Text to search for inside althete names",
         },
+        hasNotes: {
+          type: GraphQLBoolean,
+          description: "Has the user written a note about this athlete?",
+        },
+        tag: {
+          type: new GraphQLList(GraphQLInt),
+          description:
+            "Has the user tagged this athlete with the given tag identifier(s)? (1-5)",
+        },
       },
       description: "Athletes associated with this event",
-      resolve: async ({ id: eventId }, args) => {
-        const { page = 1, perPage, searchText } = args
+      resolve: async ({ id: eventId }, args, { user }) => {
+        const { page = 1, perPage, tag, hasNotes } = args
         const pagination =
           page && perPage
             ? {
@@ -94,29 +104,51 @@ export default new GraphQLObjectType({
               }
             : {}
 
-        const filters = Object.keys(args).reduce(
-          (aggregator, key) => {
-            if (key === "searchText") {
-              return {
-                ...aggregator,
-                ...searchTextFilter(args[key]),
+        const submittedNotesAthleteIds = hasNotes
+          ? await User.hasNotes(user.username)
+          : []
+
+        const taggedElements =
+          tag && tag.length ? await User.taggedAs(user.username, tag) : []
+
+        const specificIdsToEvaluate = [
+          ...submittedNotesAthleteIds,
+          ...taggedElements,
+        ]
+
+        const filterBase =
+          (tag && tag.length) || hasNotes
+            ? {
+                events: eventId,
+                id: { $in: specificIdsToEvaluate },
               }
+            : {
+                events: eventId,
+              }
+
+        const filters = Object.keys(args).reduce((aggregator, key) => {
+          if (key === "searchText") {
+            return {
+              ...aggregator,
+              ...searchTextFilter(args[key]),
             }
-            return key !== "page" && key !== "perPage"
-              ? {
-                  ...aggregator,
-                  [key]: args[key],
-                }
-              : aggregator
-          },
-          {
-            events: eventId,
           }
-        )
+
+          return key !== "page" &&
+            key !== "perPage" &&
+            key !== "tag" &&
+            key !== "hasNotes"
+            ? {
+                ...aggregator,
+                [key]: args[key],
+              }
+            : aggregator
+        }, filterBase)
 
         const count = Athlete.find()
           .count()
           .lean()
+
         const countAtEvent = Athlete.find({ events: eventId })
           .count()
           .lean()
