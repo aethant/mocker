@@ -51,5 +51,16 @@ const eventSchema = new Schema({
   },
 })
 
+eventSchema.statics.bySport = async function bySport() {
+  const data = await this.find()
+  return data.reduce(
+    (aggregate, event) => ({
+      ...aggregate,
+      [event.sport]: [...(aggregate[event.sport] || []), event.id],
+    }),
+    {}
+  )
+}
+
 const Event = mongoose.model("Events", eventSchema)
 export default Event

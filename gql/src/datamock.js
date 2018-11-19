@@ -4,15 +4,64 @@ import fetch from "node-fetch"
 
 import EventData from "./data/events"
 import AthletesData from "./data/athletes"
+import TeamsData from "./data/teams"
 
 import Event from "./schema/events"
 import User from "./schema/user"
 import Athlete from "./schema/athletes"
+import Team from "./schema/teams"
 
 import parse from "date-fns/parse"
 import getTime from "date-fns/get_time"
 
 const r = new Router()
+
+r.get("/generate/teams", async (req, res) => {
+  const events = await Event.bySport()
+  const athletes = await Athlete.bySport()
+
+  await TeamsData.map(async team => {
+    // for this sport, we have these events
+    const eventsForThisSport = events[team.sport]
+    // randomly assign a up to 10 events: Math.floor(Math.random() * 10) + 1
+    let eventsAttending = []
+    for (let i = 0; i <= Math.floor(Math.random() * 10) + 1; i++) {
+      eventsAttending.push(
+        eventsForThisSport[
+          Math.floor(Math.random() * eventsForThisSport.length)
+        ]
+      )
+    }
+
+    const athletesForThisSport = athletes[team.sport]
+    let athletesOnTeam = []
+    for (let i = 0; i <= 5; i++) {
+      // always 5 players on a team
+      athletesOnTeam.push(
+        athletesForThisSport[
+          Math.floor(Math.random() * athletesForThisSport.length)
+        ]
+      )
+    }
+
+    const tteam = new Team({
+      ...team,
+      events: eventsAttending,
+      athletes: athletesOnTeam,
+    })
+
+    await tteam.save((err, v) => {
+      if (err) {
+        console.error("Team save error", { err })
+        return res.sendStatus(500)
+      }
+
+      console.log(`Team #${v.id} saved.`)
+    })
+  })
+
+  return res.sendStatus(201)
+})
 
 r.get("/generate/events", (req, res) => {
   EventData.forEach(event => {

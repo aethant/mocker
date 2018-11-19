@@ -97,5 +97,16 @@ userSchema.statics.hasNotes = async function hasNotes(id, athleteId) {
   })
 }
 
+userSchema.statics.bySport = async function bySport() {
+  const data = await this.find()
+  return data.reduce(
+    (aggregate, user) => ({
+      ...aggregate,
+      [user.sport]: [...(aggregate[user.sport] || []), user.id],
+    }),
+    {}
+  )
+}
+
 const User = mongoose.model("User", userSchema)
 export default User

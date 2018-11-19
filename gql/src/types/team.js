@@ -5,12 +5,14 @@ import {
   GraphQLList,
   GraphQLBoolean,
 } from "graphql"
+import Athlete from "../schema/athletes"
+import Event from "../schema/events"
 import athletesResponseType from "./athleteResponse"
 import AthletesResolver from "../resolvers/athletes"
 
 export default new GraphQLObjectType({
-  name: "Event",
-  description: "Event",
+  name: "Team",
+  description: "Team",
   fields: () => ({
     id: {
       type: GraphQLInt,
@@ -19,42 +21,14 @@ export default new GraphQLObjectType({
       type: GraphQLString,
       description: "Event name",
     },
-    organizer: {
-      type: GraphQLString,
-      description: "Event Organizer",
-    },
-    start_date: {
-      type: GraphQLString,
-    },
-    end_date: {
-      type: GraphQLString,
-    },
     city: {
       type: GraphQLString,
     },
     state: {
       type: GraphQLString,
     },
-    website: {
+    logo: {
       type: GraphQLString,
-      description: "Event website",
-    },
-    phone: {
-      type: GraphQLString,
-    },
-    logo_image: {
-      type: GraphQLString,
-    },
-    sport: {
-      type: GraphQLInt,
-    },
-    tracking: {
-      type: GraphQLBoolean,
-      description: "is user tracking this event?",
-    },
-    attending: {
-      type: GraphQLBoolean,
-      description: "is user attending this event?",
     },
     athletes: {
       type: athletesResponseType,
@@ -84,7 +58,10 @@ export default new GraphQLObjectType({
       },
       description: "Athletes associated with this event",
       resolve: (queryContext, args, context) =>
-        AthletesResolver(queryContext, args, { ...context, query: "event" }),
+        AthletesResolver(queryContext, args, { ...context, query: "team" }),
+    },
+    events: {
+      type: new GraphQLList(GraphQLInt),
     },
   }),
 })

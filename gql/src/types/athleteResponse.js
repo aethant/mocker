@@ -1,9 +1,4 @@
-import {
-  GraphQLObjectType,
-  GraphQLList,
-  GraphQLInt,
-  GraphQLString,
-} from "graphql"
+import { GraphQLObjectType, GraphQLList } from "graphql"
 
 import athleteMetaData from "./athleteMetaData"
 import athletes from "./athlete"

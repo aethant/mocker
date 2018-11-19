@@ -70,5 +70,16 @@ AthleteSchema.virtual("fullName").get(function() {
   return `${this.first_name} ${this.last_name}`
 })
 
+AthleteSchema.statics.bySport = async function bySport() {
+  const data = await this.find()
+  return data.reduce(
+    (aggregate, athlete) => ({
+      ...aggregate,
+      [athlete.sport]: [...(aggregate[athlete.sport] || []), athlete.id],
+    }),
+    {}
+  )
+}
+
 const Athlete = mongoose.model("Athletes", AthleteSchema)
 export default Athlete

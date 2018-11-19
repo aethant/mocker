@@ -4,7 +4,6 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
-  GraphQLNonNull,
   GraphQLBoolean,
   GraphQLList,
 } from "graphql"
@@ -13,11 +12,17 @@ import uniq from "lodash/uniq"
 import athletesType from "./types/athlete"
 import eventType from "./types/event"
 import eventsResponseType from "./types/eventReponse"
+import teamsResponseType from "./types/teamResponse"
+import userType from "./types/user"
+import athletesResponseType from "./types/athleteResponse"
 
 import Event from "./schema/events"
 import User from "./schema/user"
 import Athlete from "./schema/athletes"
-import userType from "./types/user"
+import Teams from "./schema/teams"
+
+import TeamsResolver from "./resolvers/teams"
+import AthletesResolver from "./resolvers/athletes"
 
 const dateFilters = (start, end) => ({
   start_date: start
@@ -36,56 +41,33 @@ const rootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {
     athletes: {
-      type: new GraphQLList(athletesType),
+      type: athletesResponseType,
       args: {
+        id: {
+          type: GraphQLInt,
+        },
         page: {
           type: GraphQLInt,
         },
         perPage: {
           type: GraphQLInt,
         },
+        searchText: {
+          type: GraphQLString,
+          description: "Text to search for inside althete names",
+        },
+        hasNotes: {
+          type: GraphQLBoolean,
+          description: "Has the user written a note about this athlete?",
+        },
+        tag: {
+          type: new GraphQLList(GraphQLInt),
+          description:
+            "Has the user tagged this athlete with the given tag identifier(s)? (1-5)",
+        },
       },
-      resolve: async (_, args, { user }) => {
-        const { page = 1, perPage } = args
-        const pagination =
-          page && perPage
-            ? {
-                skip: perPage * (page - 1),
-                limit: perPage,
-              }
-            : {}
-
-        const filters = Object.keys(args).reduce((aggregator, key) => {
-          return key !== "page" && key !== "perPage"
-            ? {
-                ...aggregator,
-                [key]: args[key],
-              }
-            : aggregator
-        }, {})
-
-        const count = await Athlete.find({})
-          .count()
-          .lean()
-
-        const filtered = await Athlete.find(filters)
-          .count()
-          .lean()
-
-        const results = perPage
-          ? Athlete.find(filters)
-              .limit(pagination.limit)
-              .skip(pagination.skip)
-          : Athlete.find(filters)
-
-        return {
-          _meta: {
-            count,
-            filtered,
-          },
-          results,
-        }
-      },
+      resolve: (queryContext, args, context) =>
+        AthletesResolver(queryContext, args, { ...context }),
     },
     event: {
       type: eventType,
@@ -108,6 +90,28 @@ const rootQuery = new GraphQLObjectType({
           attending: userData.events.attending.includes(id),
         }
       },
+    },
+    teams: {
+      type: teamsResponseType,
+      args: {
+        id: {
+          type: GraphQLInt,
+        },
+        page: {
+          type: GraphQLInt,
+        },
+        perPage: {
+          type: GraphQLInt,
+        },
+        state: {
+          type: new GraphQLList(GraphQLString),
+        },
+        tracked: {
+          type: GraphQLBoolean,
+          description: "Team is being tracked?",
+        },
+      },
+      resolve: TeamsResolver,
     },
     events: {
       type: eventsResponseType,
