@@ -1,15 +1,18 @@
 import { Router } from "express"
 import mongoose from "mongoose"
 import fetch from "node-fetch"
+import shortid from "shortid"
 
 import EventData from "./data/events"
 import AthletesData from "./data/athletes"
 import TeamsData from "./data/teams"
+import ScheduleLocations from "./data/schedulelocations"
 
 import Event from "./schema/events"
 import User from "./schema/user"
 import Athlete from "./schema/athletes"
 import Team from "./schema/teams"
+import Schedule from "./schema/schedules"
 
 import parse from "date-fns/parse"
 import getTime from "date-fns/get_time"
@@ -36,7 +39,8 @@ r.get("/generate/teams", async (req, res) => {
     const athletesForThisSport = athletes[team.sport]
     let athletesOnTeam = []
     for (let i = 0; i <= 5; i++) {
-      // always 5 players on a team
+      // always 5 players on a team... but we have no checking for existing player ids, so this creates a certain
+      // amount of "fuzz" which isn't necessarily a bad thing.
       athletesOnTeam.push(
         athletesForThisSport[
           Math.floor(Math.random() * athletesForThisSport.length)
@@ -60,6 +64,62 @@ r.get("/generate/teams", async (req, res) => {
     })
   })
 
+  return res.sendStatus(201)
+})
+
+// oh god, a closure... in the wild.
+// make sure the same team isn't playing itself.
+// obligatory gif: https://media2.giphy.com/media/zNXvBiNNcrjDW/giphy.webp?cid=3640f6095bf2e7c2727944466f833811
+const generateOpposingTeam = (ht, opposerCount) => {
+  const opposingTeam = () => {
+    const opp = Math.floor(Math.random() * opposerCount)
+    if (opp === ht) {
+      opposingTeam()
+    }
+
+    return opp
+  }
+
+  return opposingTeam()
+}
+
+r.get("/generate/schedules", async (req, res) => {
+  const totalScheduleLocations = ScheduleLocations.length
+  const teams = await Team.bySport()
+
+  const sportsForTeamsKeys = Object.keys(teams)
+  sportsForTeamsKeys.map(sport => {
+    const teamBySport = teams[sport]
+    const matchups = teamBySport.map(teamA => ({
+      teamA,
+      teamB: generateOpposingTeam(teamA, teamBySport.length),
+    }))
+
+    matchups.forEach(async playingteams => {
+      const { teamA, teamB } = playingteams
+      const { location } = ScheduleLocations[
+        Math.floor(Math.random() * totalScheduleLocations)
+      ]
+
+      const entry = new Schedule({
+        id: shortid(),
+        sport,
+        location,
+        teams: [teamA, teamB],
+        start_time: new Date(
+          +new Date() + Math.floor(Math.random() * 10000000000)
+        ),
+      })
+
+      await entry.save((err, ent) => {
+        if (err) {
+          console.error(`Error generating schedule entry`, { err })
+        }
+
+        console.info(`Created ${ent.id} schedule entry.`)
+      })
+    })
+  })
   return res.sendStatus(201)
 })
 

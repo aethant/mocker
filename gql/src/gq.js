@@ -15,9 +15,11 @@ import eventsResponseType from "./types/eventReponse"
 import teamsResponseType from "./types/teamResponse"
 import userType from "./types/user"
 import athletesResponseType from "./types/athleteResponse"
+import scheduleResponseType from "./types/scheduleResponse"
 
 import Event from "./schema/events"
 import User from "./schema/user"
+import Schedule from "./schema/schedules"
 
 import TeamsResolver from "./resolvers/teams"
 import AthletesResolver from "./resolvers/athletes"
@@ -28,6 +30,85 @@ import UserResolver from "./resolvers/user"
 const rootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {
+    schedules: {
+      type: scheduleResponseType,
+      args: {
+        id: {
+          type: GraphQLInt,
+        },
+        page: {
+          type: GraphQLInt,
+        },
+        perPage: {
+          type: GraphQLInt,
+        },
+        tracked: {
+          type: GraphQLBoolean,
+          description: "Team is being tracked?",
+        },
+      },
+      resolve: async (_, args, { user }) => {
+        const userData = await User.findOne({
+          "name.login": user.username,
+        }).lean()
+
+        const { page = 1, perPage = 10 } = args
+        const pagination =
+          page && perPage
+            ? {
+                skip: perPage * (page - 1),
+                limit: perPage,
+              }
+            : {}
+
+        const prefilters = Object.keys(args).reduce((aggregator, key) => {
+          return key !== "page" && key !== "perPage"
+            ? {
+                ...aggregator,
+                [key]: args[key],
+              }
+            : aggregator
+        }, {})
+
+        const filters = Object.keys(prefilters).reduce(
+          (aggregator, v) => {
+            if (prefilters[v]) {
+              return {
+                ...aggregator,
+                [v]: prefilters[v],
+              }
+            }
+            return aggregator
+          },
+          {
+            sport: userData.sport,
+          }
+        )
+
+        const count = await Schedule.find({
+          sport: userData.sport,
+        })
+          .count()
+          .lean()
+
+        const filtered = await Schedule.find(filters)
+          .count()
+          .lean()
+
+        const results = await Schedule.find(filters)
+          .limit(pagination.limit)
+          .skip(pagination.skip)
+          .lean()
+
+        return {
+          _meta: {
+            count,
+            filtered,
+          },
+          results,
+        }
+      },
+    },
     athletes: {
       type: athletesResponseType,
       args: {

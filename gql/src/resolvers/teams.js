@@ -53,7 +53,7 @@ export default async (_, args, { user }) => {
     .count()
     .lean()
 
-  const data = await Teams.find(filters)
+  const results = await Teams.find(filters)
     .limit(pagination.limit)
     .skip(pagination.skip)
     .lean()
@@ -63,6 +63,6 @@ export default async (_, args, { user }) => {
       count,
       filtered,
     },
-    results: data,
+    results,
   }
 }

@@ -35,5 +35,16 @@ const teamSchema = new Schema({
   },
 })
 
+teamSchema.statics.bySport = async function bySport() {
+  const data = await this.find()
+  return data.reduce(
+    (aggregate, team) => ({
+      ...aggregate,
+      [team.sport]: [...(aggregate[team.sport] || []), team.id],
+    }),
+    {}
+  )
+}
+
 const Team = mongoose.model("Teams", teamSchema)
 export default Team
