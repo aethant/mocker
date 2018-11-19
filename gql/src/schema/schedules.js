@@ -26,6 +26,10 @@ const scheduleSchema = new Schema({
     type: Number,
     required: true,
   },
+  event: {
+    type: Number,
+    required: true,
+  },
 })
 
 const Schedule = mongoose.model("Schedules", scheduleSchema)

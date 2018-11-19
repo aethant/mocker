@@ -6,7 +6,9 @@ import {
   GraphQLBoolean,
 } from "graphql"
 import athletesResponseType from "./athleteResponse"
+import scheduleResponseType from "./scheduleResponse"
 import AthletesResolver from "../resolvers/athletes"
+import ScheduleResolver from "../resolvers/schedule"
 
 export default new GraphQLObjectType({
   name: "Event",
@@ -85,6 +87,29 @@ export default new GraphQLObjectType({
       description: "Athletes associated with this event",
       resolve: (queryContext, args, context) =>
         AthletesResolver(queryContext, args, { ...context, query: "event" }),
+    },
+    schedules: {
+      type: scheduleResponseType,
+      description: "Schedule of matches at event",
+      args: {
+        id: {
+          type: GraphQLString,
+        },
+        event: {
+          type: GraphQLInt,
+        },
+        page: {
+          type: GraphQLInt,
+        },
+        perPage: {
+          type: GraphQLInt,
+        },
+        tracked: {
+          type: GraphQLBoolean,
+          description: "Team is being tracked?",
+        },
+      },
+      resolve: ScheduleResolver,
     },
   }),
 })

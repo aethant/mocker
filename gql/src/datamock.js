@@ -86,8 +86,10 @@ const generateOpposingTeam = (ht, opposerCount) => {
 r.get("/generate/schedules", async (req, res) => {
   const totalScheduleLocations = ScheduleLocations.length
   const teams = await Team.bySport()
+  const events = await Event.bySport()
 
   const sportsForTeamsKeys = Object.keys(teams)
+
   sportsForTeamsKeys.map(sport => {
     const teamBySport = teams[sport]
     const matchups = teamBySport.map(teamA => ({
@@ -101,10 +103,13 @@ r.get("/generate/schedules", async (req, res) => {
         Math.floor(Math.random() * totalScheduleLocations)
       ]
 
+      const event = Math.floor(Math.random() * events[sport].length)
+
       const entry = new Schedule({
         id: shortid(),
         sport,
         location,
+        event,
         teams: [teamA, teamB],
         start_time: new Date(
           +new Date() + Math.floor(Math.random() * 10000000000)
