@@ -10,6 +10,7 @@ import {
 import uniq from "lodash/uniq"
 
 import athletesType from "./types/athlete"
+import scheduleType from "./types/schedule"
 import eventType from "./types/event"
 import eventsResponseType from "./types/eventReponse"
 import teamsResponseType from "./types/teamResponse"
@@ -203,6 +204,43 @@ const rootMutation = new GraphQLObjectType({
 
           return {
             ...response,
+          }
+        })
+      },
+    },
+    schedule: {
+      type: scheduleType,
+      description: "Modify schedule data on the user record",
+      args: {
+        id: {
+          type: GraphQLString,
+          description: "Scheduled event to toggle tracking on",
+        },
+      },
+      resolve: (_, args, { user: { username } }) => {
+        return User.findOne({
+          "name.login": username,
+        }).then(async user => {
+          const { schedule: { tracking = [] } = {} } = user
+
+          const alreadyTracking = tracking.includes(args.id)
+
+          const updatedTracking = alreadyTracking
+            ? tracking.filter(v => v !== args.id)
+            : [...tracking, args.id]
+
+          user.set({
+            schedule: {
+              tracking: updatedTracking,
+            },
+          })
+
+          const updatedUser = await user.save()
+          const response = updatedUser.schedule.tracking.includes(args.id)
+
+          return {
+            id: args.id,
+            tracking: response,
           }
         })
       },

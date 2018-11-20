@@ -45,14 +45,24 @@ export default async (_, args, { user }) => {
     .count()
     .lean()
 
-  const filtered = await Schedule.find(filters)
+  const filtered = await Schedule.find({ ...filters })
     .count()
     .lean()
 
-  const results = await Schedule.find(filters)
+  const data = await Schedule.find({ ...filters })
     .limit(pagination.limit)
     .skip(pagination.skip)
     .lean()
+
+  const results = data.reduce((aggregator, element) => {
+    return [
+      ...aggregator,
+      {
+        ...element,
+        tracking: userData.schedule.tracking.includes(element.id),
+      },
+    ]
+  }, [])
 
   return {
     _meta: {

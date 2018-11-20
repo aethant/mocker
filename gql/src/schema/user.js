@@ -57,6 +57,12 @@ const userSchema = new Schema({
       default: {},
     },
   },
+  schedule: {
+    tracking: {
+      type: Array,
+      default: ["KTG_T2oEBjQ"],
+    },
+  },
   preferences: {
     bypassAttendanceConfirmation: {
       type: Boolean,

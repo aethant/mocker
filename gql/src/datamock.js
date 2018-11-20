@@ -83,6 +83,17 @@ const generateOpposingTeam = (ht, opposerCount) => {
   return opposingTeam()
 }
 
+r.get("/generate/rollschedules", async (req, res) => {
+  await Schedule.find({ sport: 2 }).then(schedules => {
+    schedules.forEach(async schedule => {
+      schedule.set({ event: 22 })
+      await schedule.save()
+    })
+  })
+
+  return res.sendStatus(203)
+})
+
 r.get("/generate/schedules", async (req, res) => {
   const totalScheduleLocations = ScheduleLocations.length
   const teams = await Team.bySport()

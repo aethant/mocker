@@ -3,6 +3,7 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLList,
+  GraphQLBoolean,
 } from "graphql"
 
 import teamType from "./team"
@@ -27,6 +28,10 @@ export default new GraphQLObjectType({
     start_time: {
       type: GraphQLString,
       description: "When does the match start? (time/day)",
+    },
+    tracking: {
+      type: GraphQLBoolean,
+      description: "Is the user tracking this match?",
     },
     teams: {
       type: new GraphQLList(teamType),

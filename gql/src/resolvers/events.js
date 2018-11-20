@@ -1,5 +1,6 @@
 import User from "../schema/user"
 import Event from "../schema/events"
+import uniq from "lodash/uniq"
 
 const dateFilters = (start, end) => ({
   start_date: start
