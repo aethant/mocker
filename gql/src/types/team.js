@@ -30,6 +30,14 @@ export default new GraphQLObjectType({
     logo: {
       type: GraphQLString,
     },
+    sport: {
+      type: GraphQLInt,
+      description: "Sport associated with this team",
+    },
+    events: {
+      type: new GraphQLList(GraphQLInt),
+      description: "Event ID of an event that a team may be participating in",
+    },
     athletes: {
       type: athletesResponseType,
       args: {

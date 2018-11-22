@@ -112,6 +112,15 @@ const rootQuery = new GraphQLObjectType({
           type: GraphQLBoolean,
           description: "Team is being tracked?",
         },
+        sport: {
+          type: GraphQLInt,
+          description: "Sport associated with this team",
+        },
+        event: {
+          type: GraphQLInt,
+          description:
+            "Event ID of an event that a team may be participating in",
+        },
       },
       resolve: TeamsResolver,
     },

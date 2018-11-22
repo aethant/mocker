@@ -1,6 +1,8 @@
 import Teams from "../schema/teams"
 import User from "../schema/user"
 
+const findAgainstEventId = id => (id ? { events: { $in: [id] } } : {})
+
 export default async (_, args, { user }) => {
   const userData = await User.findOne({
     "name.login": user.username,
@@ -16,7 +18,7 @@ export default async (_, args, { user }) => {
       : {}
 
   const prefilters = Object.keys(args).reduce((aggregator, key) => {
-    return key !== "page" && key !== "perPage"
+    return key !== "page" && key !== "perPage" && key !== "event"
       ? {
           ...aggregator,
           [key]: args[key],
@@ -39,6 +41,7 @@ export default async (_, args, { user }) => {
       return aggregator
     },
     {
+      ...findAgainstEventId(args.event),
       sport: userData.sport,
     }
   )
