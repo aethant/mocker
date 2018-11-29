@@ -24,15 +24,12 @@ const eventSchema = new Schema({
   },
   end_date: {
     type: Date,
-    required: true,
   },
   city: {
     type: String,
-    required: true,
   },
   state: {
     type: String,
-    required: true,
   },
   website: {
     type: String,
@@ -40,7 +37,6 @@ const eventSchema = new Schema({
   },
   phone: {
     type: String,
-    required: true,
   },
   logo_image: {
     type: String,

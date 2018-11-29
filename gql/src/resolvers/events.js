@@ -15,6 +15,9 @@ const trackedFilters = ids => ({
   id: { $in: ids },
 })
 
+const searchTextFilter = val =>
+  val.length === 0 ? null : { name: { $regex: val, $options: "i" } }
+
 export default async (_, args, { user }) => {
   const userData = await User.findOne({
     "name.login": user.username,
@@ -56,6 +59,12 @@ export default async (_, args, { user }) => {
 
   const filters = Object.keys(prefilters).reduce(
     (aggregator, v) => {
+      if (v === "searchText") {
+        return {
+          ...aggregator,
+          ...searchTextFilter(args[v]),
+        }
+      }
       if (v === "state" && prefilters[v].length === 0) {
         return aggregator
       }
@@ -72,6 +81,7 @@ export default async (_, args, { user }) => {
     }
   )
 
+  console.log({ filters })
   const count = await Event.find({})
     .count()
     .lean()
