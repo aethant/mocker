@@ -156,6 +156,10 @@ const rootQuery = new GraphQLObjectType({
           type: GraphQLString,
           description: "Event Organizer",
         },
+        searchText: {
+          type: GraphQLString,
+          description: "Text to search for inside althete names",
+        },
       },
       resolve: EventsResolver,
     },

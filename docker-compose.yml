@@ -1,11 +1,10 @@
-version: "2"
+version: "3"
 services:
   mockjwt:
     environment:
       NODE_ENV: development
       TZ: "America/Chicago"
-    build:
-      context: ./mockjwt
+    build: ./mockjwt
     networks:
       - front
       - back
@@ -20,25 +19,6 @@ services:
   #     NODE_ENV: development
   #     TZ: "America/Chicago"
   #   build: ./gql
-  #   # command: nodemon -L --watch /src --exec babel-node src/index.js
-  #   volumes:
-  #     - ./gql:/gql
-  #     - /gql/node_modules
-  #   ports:
-  #     - "8002:8002"
-  #   expose:
-  #     - "8002"
-  #   networks:
-  #     - front
-  #     - back
-  # gql:
-  #   depends_on:
-  #     - mongo
-  #   environment:
-  #     NODE_ENV: development
-  #     TZ: "America/Chicago"
-  #   build:
-  #     context: ./gql
   #   networks:
   #     - front
   #     - back
@@ -50,15 +30,14 @@ services:
     environment:
       NODE_ENV: development
       TZ: "America/Chicago"
-    build:
-      context: ./db
+    build: ./db
     volumes:
       - $HOME/gameplan/data:/data
     networks:
       - back
     ports:
       - "27017:27017"
-      - "27018:27018"
+      # - "27018:27018"
     expose:
       - "27017"
     # command: --smallfiles --rest --httpinterface

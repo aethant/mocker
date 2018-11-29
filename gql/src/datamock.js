@@ -4,6 +4,7 @@ import fetch from "node-fetch"
 import shortid from "shortid"
 
 import EventData from "./data/events"
+import DemoEventData from "./data/demoevents"
 import AthletesData from "./data/athletes"
 import TeamsData from "./data/teams"
 import ScheduleLocations from "./data/schedulelocations"
@@ -141,6 +142,26 @@ r.get("/generate/schedules", async (req, res) => {
 
 r.get("/generate/events", (req, res) => {
   EventData.forEach(event => {
+    const evt = new Event({
+      ...event,
+      start_time: getTime(parse(event.start_time)) / 1000,
+      end_time: getTime(parse(event.end_time)) / 1000,
+    })
+
+    evt.save((err, v) => {
+      if (err) {
+        console.error("Event save error", { err })
+        return res.sendStatus(500)
+      }
+
+      console.log(`Event #${v.id} saved.`)
+    })
+  })
+  return res.sendStatus(201)
+})
+
+r.get("/generate/demoevents", (req, res) => {
+  DemoEventData.forEach(event => {
     const evt = new Event({
       ...event,
       start_time: getTime(parse(event.start_time)) / 1000,
