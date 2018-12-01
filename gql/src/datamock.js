@@ -1,7 +1,8 @@
 import { Router } from "express"
-import mongoose from "mongoose"
+import bcrypt from "bcrypt-nodejs"
 import fetch from "node-fetch"
 import shortid from "shortid"
+import jwt from "jsonwebtoken"
 
 import EventData from "./data/events"
 import DemoEventData from "./data/demoevents"
@@ -19,6 +20,54 @@ import parse from "date-fns/parse"
 import getTime from "date-fns/get_time"
 
 const r = new Router()
+const saltRounds = 10
+const SERVER_SECRET_KEY = "keyboard cat 4 ever"
+
+r.post("/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body
+    console.log({ email, password })
+    const { id, email: username, passwordHash } = await User.findOne({
+      email,
+    }).lean()
+
+    const secured = await new Promise((resolve, reject) => {
+      bcrypt.compare(password, passwordHash, (err, response) => {
+        if (err) {
+          console.error("hash compare error", { err })
+          reject(err)
+        }
+        resolve(response)
+      })
+    })
+
+    if (secured) {
+      // Sigining the token
+      let token = jwt.sign({ id, email: username }, SERVER_SECRET_KEY, {
+        expiresIn: 129600,
+      })
+      // returning the token
+      return res.json({
+        success: true,
+        err: null,
+        token,
+      })
+    }
+
+    return res.status(401).json({
+      success: false,
+      token: null,
+      err: "Password is incorrect",
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(401).json({
+      success: false,
+      token: null,
+      err: "Username is incorrect",
+    })
+  }
+})
 
 r.get("/generate/teams", async (req, res) => {
   const events = await Event.bySport()
@@ -84,11 +133,45 @@ const generateOpposingTeam = (ht, opposerCount) => {
   return opposingTeam()
 }
 
-r.get("/generate/rollschedules", async (req, res) => {
+r.get("/generate/teamsandschedulestousersport", async (req, res) => {
   await Schedule.find({ sport: 2 }).then(schedules => {
     schedules.forEach(async schedule => {
-      schedule.set({ event: 22 })
+      schedule.set({ sport: 17638 })
       await schedule.save()
+    })
+  })
+
+  await Team.find({ sport: 2 }).then(teams => {
+    teams.forEach(async team => {
+      team.set({ sport: 17638 })
+      await team.save()
+    })
+  })
+
+  return res.sendStatus(203)
+})
+
+r.get("/generate/reassigntoevent", async (req, res) => {
+  await Schedule.find({ sport: 17638 }).then(schedules => {
+    schedules.forEach(async schedule => {
+      schedule.set({ event: 1010 })
+      await schedule.save()
+    })
+  })
+
+  await Team.find({ sport: 17638 }).then(teams => {
+    teams.forEach(async team => {
+      const events = team.events
+      team.set({ events: [...events, 1010] })
+      await team.save()
+    })
+  })
+
+  await Athlete.find({ sport: 17638 }).then(athletes => {
+    athletes.forEach(async athlete => {
+      const events = athlete.events
+      athlete.set({ events: [...events, 1010] })
+      await athlete.save()
     })
   })
 
@@ -226,44 +309,61 @@ r.get("/delete/athletes", (req, res) => {
   return res.sendStatus(200)
 })
 
-r.get("/generate/user", (req, res) => {
-  const user = new User({
-    id: 1,
-    name: {
-      login: "test",
-      first: "John",
-      last: "Smith",
-    },
-    sport: 2,
-    email: "test@example.org",
-    school: {
-      name: "Hardknocks",
-      title: "Head Coach",
-    },
-    events: {
-      tracking: [],
-      attending: [],
-    },
-    athletes: {
-      tagged: [],
-      notes: {
-        8: {
-          1542378916: { content: "Foo" },
-        },
-        10: {},
+r.get("/generate/user", async (req, res) => {
+  try {
+    const passwordHash = await new Promise((resolve, reject) =>
+      bcrypt.hash("ncsa1333", null, null, (err, hash) => {
+        if (err) {
+          console.error("password gen error", { err })
+          reject(err)
+        }
+
+        resolve(hash)
+      })
+    )
+
+    const user = new User({
+      id: 1,
+      name: {
+        login: "test",
+        first: "John",
+        last: "Smith",
       },
-    },
-  })
+      sport: 2,
+      email: "testuser@ncsasports.org",
+      passwordHash,
+      school: {
+        name: "Hardknocks",
+        title: "Head Coach",
+      },
+      events: {
+        tracking: [],
+        attending: [],
+      },
+      athletes: {
+        tagged: [],
+        notes: {
+          8: {
+            1542378916: { content: "Foo" },
+          },
+          10: {},
+        },
+      },
+    })
 
-  user.save((err, v) => {
-    if (err) {
-      console.error("User save error", { err })
-      return res.sendStatus(500)
-    }
+    user.save((err, v) => {
+      if (err) {
+        console.error("User save error", { err })
+        return res.sendStatus(500)
+      }
 
-    console.log(`User saved.`)
-    return res.sendStatus(201)
-  })
+      console.log(`User saved.`)
+      return res.sendStatus(201)
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.sendStatus(500)
+  }
 })
 
 export default r

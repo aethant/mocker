@@ -18,9 +18,9 @@ const trackedFilters = ids => ({
 const searchTextFilter = val =>
   val.length === 0 ? null : { name: { $regex: val, $options: "i" } }
 
-export default async (_, args, { user }) => {
+export default async (_, args, { user: { email } }) => {
   const userData = await User.findOne({
-    "name.login": user.username,
+    email,
   }).lean()
 
   const { page = 1, perPage = 200, start_date, end_date } = args
@@ -81,7 +81,6 @@ export default async (_, args, { user }) => {
     }
   )
 
-  console.log({ filters })
   const count = await Event.find({})
     .count()
     .lean()

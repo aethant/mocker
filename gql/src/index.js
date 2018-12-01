@@ -7,10 +7,15 @@ import mongoose from "mongoose"
 import GenerateMockDataRouter from "./datamock"
 import passportJWT from "passport-jwt"
 import exjwt from "express-jwt"
+import bcrypt from "bcrypt-nodejs"
+
+import User from "./schema/user"
 
 const { Strategy: JWTStrategy, ExtractJwt } = passportJWT
-
+const saltRounds = 10
 const server = express()
+
+const SERVER_SECRET_KEY = "keyboard cat 4 ever"
 
 const handlebars = expressHandlebars.create({
   defaultLayout: "main", // what's the name of our default layout handlebars file?
@@ -41,7 +46,7 @@ server.use(
 
 // https://github.com/auth0/express-jwt
 const jwtMW = exjwt({
-  secret: "keyboard cat 4 ever",
+  secret: SERVER_SECRET_KEY,
   // credentialsRequired: false, // process.env.NODE_ENV to bypass for dev env?
 })
 
@@ -49,8 +54,9 @@ server.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   )
+  // res.setHeader("Access-Control-Allow-Headers", "Content-type,Authorization")
   next()
 })
 

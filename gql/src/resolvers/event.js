@@ -1,10 +1,10 @@
 import User from "../schema/user"
 import Event from "../schema/events"
 
-export default async (_, args, { user }) => {
+export default async (_, args, { user: { email } }) => {
   const { id } = args
   const userData = await User.findOne({
-    "name.login": user.username,
+    email,
   }).lean()
 
   const eventData = await Event.findOne({ id }).lean()

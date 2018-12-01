@@ -84,9 +84,9 @@ export default new GraphQLObjectType({
     tag: {
       type: GraphQLInt,
       description: "User assigned tag value",
-      resolve: async ({ id }, args, { user: { username } }) => {
+      resolve: async ({ id }, args, { user: { email } }) => {
         const userData = await User.findOne({
-          "name.login": username,
+          email,
         }).lean()
 
         const { tag = 0 } = userData.athletes.tagged.find(v => v.id === id) || 0

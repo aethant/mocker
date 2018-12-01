@@ -3,9 +3,9 @@ import User from "../schema/user"
 
 const findAgainstEventId = id => (id ? { events: { $in: [id] } } : {})
 
-export default async (_, args, { user }) => {
+export default async (_, args, { user: { email } }) => {
   const userData = await User.findOne({
-    "name.login": user.username,
+    email,
   }).lean()
 
   const { page = 1, perPage = 10 } = args

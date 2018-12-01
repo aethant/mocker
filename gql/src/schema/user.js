@@ -29,6 +29,9 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  passwordHash: {
+    type: String,
+  },
   school: {
     name: {
       type: String,
@@ -72,9 +75,9 @@ const userSchema = new Schema({
 })
 
 // retrieve list of athletes tagged by user with a given tag or tags
-userSchema.statics.taggedAs = async function taggedAs(id, tag) {
+userSchema.statics.taggedAs = async function taggedAs(email, tag) {
   return await this.findOne({
-    "name.login": id,
+    email,
   }).then(user => {
     const tags = user.athletes.tagged.filter(el => tag.includes(el.tag))
     return tags.map(tag => tag.id)
@@ -82,9 +85,9 @@ userSchema.statics.taggedAs = async function taggedAs(id, tag) {
 }
 
 // retrieve athlete ids of athletes user has written notes on
-userSchema.statics.hasNotes = async function hasNotes(id, athleteId) {
+userSchema.statics.hasNotes = async function hasNotes(email, athleteId) {
   return await this.findOne({
-    "name.login": id,
+    email,
   }).then(user => {
     const { athletes: { notes = {} } = {} } = user
 

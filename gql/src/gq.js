@@ -187,9 +187,9 @@ const rootMutation = new GraphQLObjectType({
           desription: "Tag color set by user on this athlete",
         },
       },
-      resolve: async (_, { id, tag }, { user }) => {
+      resolve: async (_, { id, tag }, { user: { email } }) => {
         return User.findOne({
-          "name.login": user.username,
+          email,
         }).then(async user => {
           const { athletes: { tagged = [] } = {} } = user
 
@@ -230,9 +230,9 @@ const rootMutation = new GraphQLObjectType({
           description: "Scheduled event to toggle tracking on",
         },
       },
-      resolve: (_, args, { user: { username } }) => {
+      resolve: (_, args, { user: { email } }) => {
         return User.findOne({
-          "name.login": username,
+          email,
         }).then(async user => {
           const { schedule: { tracking = [] } = {} } = user
 
@@ -267,8 +267,8 @@ const rootMutation = new GraphQLObjectType({
           description: "Should the 'Confirm I'm going' attendance appear?",
         },
       },
-      resolve: (_, args, { user: { username } }) => {
-        return User.findOne({ "name.login": username }).then(async user => {
+      resolve: (_, args, { user: { email } }) => {
+        return User.findOne({ email }).then(async user => {
           if ("bypassAttendanceConfirmation" in args) {
             user.set({
               preferences: {
@@ -294,8 +294,8 @@ const rootMutation = new GraphQLObjectType({
           description: "Interaction type",
         },
       },
-      resolve: (_, { eventId, interaction }, { user: { username } }) => {
-        return User.findOne({ "name.login": username }).then(async user => {
+      resolve: (_, { eventId, interaction }, { user: { email } }) => {
+        return User.findOne({ email }).then(async user => {
           const {
             events: {
               [interaction]: interactions = [],
@@ -307,7 +307,6 @@ const rootMutation = new GraphQLObjectType({
           if (interactions.includes(eventId)) {
             // already in this set, so we have to exclude it
             if (interaction === "tracking" && attending.includes(eventId)) {
-              console.log("BYPASS")
             } else {
               user.set({
                 events: {
@@ -321,9 +320,10 @@ const rootMutation = new GraphQLObjectType({
             const forcedTracking =
               interaction === "attending"
                 ? {
-                    ["tracking"]: uniq([...attending, eventId]),
+                    ["tracking"]: uniq([...tracking, eventId]),
                   }
                 : {}
+
             user.set({
               events: {
                 [interaction]: uniq([...interactions, eventId]),
@@ -356,8 +356,8 @@ const rootMutation = new GraphQLObjectType({
           description: "New event flagging stats",
         },
       },
-      resolve: (_, { eventId, trackingState }, { user: { username } }) => {
-        return User.findOne({ "name.login": username }).then(async user => {
+      resolve: (_, { eventId, trackingState }, { user: { email } }) => {
+        return User.findOne({ email }).then(async user => {
           const { events: { tracking, attending } = {} } = user
 
           if (trackingState === 3) {
@@ -386,7 +386,15 @@ const rootMutation = new GraphQLObjectType({
 
           const updatedUserData = await user.save()
           const response = await Event.findOne({ id: eventId }).lean()
-
+          console.log({
+            results: [
+              {
+                ...response,
+                tracking: updatedUserData.events.tracking.includes(eventId),
+                attending: updatedUserData.events.attending.includes(eventId),
+              },
+            ],
+          })
           return {
             results: [
               {

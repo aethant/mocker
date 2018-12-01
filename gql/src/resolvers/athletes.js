@@ -47,11 +47,11 @@ export default async (context, args, { user, query }) => {
       : {}
 
   const submittedNotesAthleteIds = hasNotes
-    ? await User.hasNotes(user.username)
+    ? await User.hasNotes(user.email)
     : []
 
   const taggedElements =
-    tag && tag.length ? await User.taggedAs(user.username, tag) : []
+    tag && tag.length ? await User.taggedAs(user.email, tag) : []
 
   const specificIdsToEvaluate = [...submittedNotesAthleteIds, ...taggedElements]
 

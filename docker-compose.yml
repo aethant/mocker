@@ -1,17 +1,17 @@
 version: "3"
 services:
-  mockjwt:
-    environment:
-      NODE_ENV: development
-      TZ: "America/Chicago"
-    build: ./mockjwt
-    networks:
-      - front
-      - back
-    ports:
-      - "8080:8080"
-    expose:
-      - "8080"
+  # mockjwt:
+  #   environment:
+  #     NODE_ENV: development
+  #     TZ: "America/Chicago"
+  #   build: ./mockjwt
+  #   networks:
+  #     - front
+  #     - back
+  #   ports:
+  #     - "8080:8080"
+  #   expose:
+  #     - "8080"
   # gql:
   #   depends_on:
   #     - mongo
@@ -40,7 +40,7 @@ services:
       # - "27018:27018"
     expose:
       - "27017"
-    # command: --smallfiles --rest --httpinterface
+  # command: --smallfiles --rest --httpinterface
 networks:
   front:
     driver: bridge
