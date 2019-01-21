@@ -343,9 +343,7 @@ r.get("/generate/user", async (req, res) => {
       athletes: {
         tagged: [],
         notes: {
-          8: {
-            1542378916: { content: "Foo" },
-          },
+          8: "this is a note",
           10: {},
         },
       },

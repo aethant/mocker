@@ -12,6 +12,7 @@ import uniq from "lodash/uniq"
 import athletesType from "./types/athlete"
 import scheduleType from "./types/schedule"
 import eventType from "./types/event"
+import athleteType from "./types/athlete"
 import eventsResponseType from "./types/eventReponse"
 import teamsResponseType from "./types/teamResponse"
 import userType from "./types/user"
@@ -24,6 +25,7 @@ import Schedule from "./schema/schedules"
 
 import TeamsResolver from "./resolvers/teams"
 import AthletesResolver from "./resolvers/athletes"
+import AthleteResolver from "./resolvers/athlete"
 import EventsResolver from "./resolvers/events"
 import EventResolver from "./resolvers/event"
 import UserResolver from "./resolvers/user"
@@ -53,6 +55,18 @@ const rootQuery = new GraphQLObjectType({
         },
       },
       resolve: ScheduleResolver,
+    },
+    athlete: {
+      type: athleteType,
+      args: {
+        id: {
+          type: GraphQLInt,
+        },
+        eventid: {
+          type: GraphQLInt,
+        },
+      },
+      resolve: AthleteResolver,
     },
     athletes: {
       type: athletesResponseType,
@@ -186,37 +200,60 @@ const rootMutation = new GraphQLObjectType({
           type: GraphQLInt,
           desription: "Tag color set by user on this athlete",
         },
+        note: {
+          type: GraphQLString,
+          description: "Athlete note to update",
+        },
       },
-      resolve: async (_, { id, tag }, { user: { email } }) => {
+      resolve: async (_, { id, tag, note }, { user: { email } }) => {
         return User.findOne({
           email,
         }).then(async user => {
-          const { athletes: { tagged = [] } = {} } = user
+          if (tag) {
+            const { athletes: { tagged = [] } = {} } = user
 
-          const tags = tagged.filter(v => v.id !== id)
-          const updatedTag =
-            tag > 0
-              ? {
-                  id,
-                  tag,
-                }
-              : null
+            const tags = tagged.filter(v => v.id !== id)
+            const updatedTag =
+              tag > 0
+                ? {
+                    id,
+                    tag,
+                  }
+                : null
 
-          const updatedTagged = [...tags, updatedTag].filter(Boolean)
+            const updatedTagged = [...tags, updatedTag].filter(Boolean)
 
-          user.set({
-            athletes: {
-              tagged: updatedTagged,
-            },
-          })
+            user.set({
+              athletes: {
+                tagged: updatedTagged,
+              },
+            })
 
-          const updatedUser = await user.save()
-          const response = updatedUser.athletes.tagged.find(
-            v => v.id === id
-          ) || { id, tag: 0 }
+            const updatedUser = await user.save()
+            const response = updatedUser.athletes.tagged.find(
+              v => v.id === id
+            ) || { id, tag: 0 }
+            return {
+              ...response,
+            }
+          }
 
-          return {
-            ...response,
+          if (note) {
+            const { athletes: { notes = {} } = {} } = user
+            let newNotes = { ...notes }
+            newNotes[id] = note
+
+            user.set({
+              athletes: {
+                notes: newNotes,
+              },
+            })
+
+            await user.save()
+            return {
+              id,
+              notes: newNotes[id],
+            }
           }
         })
       },

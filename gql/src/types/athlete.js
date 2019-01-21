@@ -8,6 +8,9 @@ import {
 
 import Event from "../schema/events"
 import event from "./event"
+import note from "./note"
+import StatsType from "./athlete-stats"
+import VideosType from "./athlete-videos"
 import User from "../schema/user"
 
 export default new GraphQLObjectType({
@@ -16,6 +19,9 @@ export default new GraphQLObjectType({
   fields: () => ({
     id: {
       type: GraphQLInt,
+    },
+    fullName: {
+      type: GraphQLString,
     },
     first_name: {
       type: GraphQLString,
@@ -92,6 +98,61 @@ export default new GraphQLObjectType({
         const { tag = 0 } = userData.athletes.tagged.find(v => v.id === id) || 0
 
         return tag
+      },
+    },
+    notes: {
+      type: GraphQLString,
+      description: "User notes on this athlete",
+      resolve: async ({ id }, args, { user: { email } }) => {
+        const idAsStr = id.toString()
+        const userData = await User.findOne({
+          email,
+        }).lean()
+
+        return userData.athletes.notes[idAsStr] || ""
+      },
+    },
+    stats: {
+      type: new GraphQLList(StatsType),
+      description: "Athlete stats to display",
+      resolve: async ({ id }, args, { user: { email } }) => {
+        const fakeStat = [
+          {
+            label: "Points/Game",
+            value: "21",
+            isCurrent: true,
+            verifier: {
+              name: "Bob Smith",
+              timestamp: "1548085475",
+            },
+          },
+          {
+            label: "Free Throw %",
+            value: "80",
+            isCurrent: true,
+          },
+        ]
+        return fakeStat
+      },
+    },
+    videos: {
+      type: new GraphQLList(VideosType),
+      description: "Videos/highlights to display",
+      resolve: async ({ id }, args, { user: { email } }) => {
+        return [
+          {
+            label: "2018 Highlights",
+            url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+            provider: 0,
+            timestamp: "1548085475",
+          },
+          {
+            label: "2018 Highlights",
+            url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+            provider: 0,
+            timestamp: "1548085475",
+          },
+        ]
       },
     },
   }),

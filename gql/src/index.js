@@ -80,6 +80,8 @@ server.listen(8002, () => {
     "mongodb://localhost/mock",
     { useNewUrlParser: true }
   )
+  mongoose.set("toObject", { virtuals: true })
+  mongoose.set("toJSON", { virtuals: true })
   const db = mongoose.connection
   db.on("error", err => console.error({ err }))
   db.once("open", () => {

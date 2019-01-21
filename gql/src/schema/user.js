@@ -74,6 +74,19 @@ const userSchema = new Schema({
   },
 })
 
+userSchema.virtual("fullName").get(function() {
+  return this.first_name + " " + this.last_name
+})
+
+userSchema.statics.athleteTag = async function athleteTag(email, athleteId) {
+  return await this.findOne({
+    email,
+  }).then(user => {
+    const { tag } = user.athletes.tagged.find(el => el.id === athleteId) || 0
+    return tag
+  })
+}
+
 // retrieve list of athletes tagged by user with a given tag or tags
 userSchema.statics.taggedAs = async function taggedAs(email, tag) {
   return await this.findOne({
