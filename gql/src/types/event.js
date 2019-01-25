@@ -27,10 +27,10 @@ export default new GraphQLObjectType({
       type: GraphQLString,
       description: "Event Organizer",
     },
-    start_date: {
+    startDate: {
       type: GraphQLString,
     },
-    end_date: {
+    endDate: {
       type: GraphQLString,
     },
     city: {
@@ -46,7 +46,7 @@ export default new GraphQLObjectType({
     phone: {
       type: GraphQLString,
     },
-    logo_image: {
+    logoImage: {
       type: GraphQLString,
     },
     sport: {

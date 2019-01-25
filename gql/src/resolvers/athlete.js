@@ -14,5 +14,6 @@ export default async (_, { id, eventid }, { user: { email } }) => {
 
   return {
     ...athleteData.toJSON(),
+    profileUrl: "https://www.google.com",
   }
 }

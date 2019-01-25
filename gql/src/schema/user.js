@@ -75,7 +75,7 @@ const userSchema = new Schema({
 })
 
 userSchema.virtual("fullName").get(function() {
-  return this.first_name + " " + this.last_name
+  return this.firstName + " " + this.lastName
 })
 
 userSchema.statics.athleteTag = async function athleteTag(email, athleteId) {

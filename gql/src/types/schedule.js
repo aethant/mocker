@@ -25,7 +25,7 @@ export default new GraphQLObjectType({
       type: GraphQLInt,
       description: "Sport for this match",
     },
-    start_time: {
+    startTime: {
       type: GraphQLString,
       description: "When does the match start? (time/day)",
     },

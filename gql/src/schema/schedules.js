@@ -14,7 +14,7 @@ const scheduleSchema = new Schema({
     type: [Number],
     required: true,
   },
-  start_time: {
+  startTime: {
     type: Date,
     required: true,
   },

@@ -21,8 +21,8 @@ const searchTextFilter = val =>
     ? null
     : {
         $or: [
-          { first_name: { $regex: val, $options: "i" } },
-          { last_name: { $regex: val, $options: "i" } },
+          { firstName: { $regex: val, $options: "i" } },
+          { lastName: { $regex: val, $options: "i" } },
         ],
       }
 

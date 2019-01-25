@@ -8,10 +8,10 @@ const AthleteSchema = new Schema(
       type: Number,
       required: true,
     },
-    first_name: {
+    firstName: {
       type: String,
     },
-    last_name: {
+    lastName: {
       type: String,
     },
     email: {
@@ -26,7 +26,7 @@ const AthleteSchema = new Schema(
     state: {
       type: String,
     },
-    team_name: {
+    teamName: {
       type: String,
     },
     height: {
@@ -53,7 +53,7 @@ const AthleteSchema = new Schema(
     telephone: {
       type: String,
     },
-    profile_picture: {
+    profilePicture: {
       type: String,
     },
     jersey: {
@@ -67,7 +67,7 @@ const AthleteSchema = new Schema(
 )
 
 AthleteSchema.virtual("fullName").get(function() {
-  return `${this.first_name} ${this.last_name}`
+  return `${this.firstName} ${this.lastName}`
 })
 
 AthleteSchema.statics.bySport = async function bySport() {

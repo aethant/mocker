@@ -206,7 +206,7 @@ r.get("/generate/schedules", async (req, res) => {
         location,
         event,
         teams: [teamA, teamB],
-        start_time: new Date(
+        startTime: new Date(
           +new Date() + Math.floor(Math.random() * 10000000000)
         ),
       })
@@ -227,8 +227,8 @@ r.get("/generate/events", (req, res) => {
   EventData.forEach(event => {
     const evt = new Event({
       ...event,
-      start_time: getTime(parse(event.start_time)) / 1000,
-      end_time: getTime(parse(event.end_time)) / 1000,
+      startTime: getTime(parse(event.startTime)) / 1000,
+      endTime: getTime(parse(event.endTime)) / 1000,
     })
 
     evt.save((err, v) => {
@@ -247,8 +247,8 @@ r.get("/generate/demoevents", (req, res) => {
   DemoEventData.forEach(event => {
     const evt = new Event({
       ...event,
-      start_time: getTime(parse(event.start_time)) / 1000,
-      end_time: getTime(parse(event.end_time)) / 1000,
+      startTime: getTime(parse(event.startTime)) / 1000,
+      endTime: getTime(parse(event.endTime)) / 1000,
     })
 
     evt.save((err, v) => {
@@ -271,7 +271,7 @@ r.get("/generate/athletes", (req, res) => {
         console.log({ d: getTime(parse(athlete.dob)) / 1000, dob: athlete.dob })
         const ath = new Athlete({
           ...athlete,
-          profile_picture: pics[i].picture.large,
+          profilePicture: pics[i].picture.large,
           dob: getTime(parse(athlete.dob)) / 1000,
           events: [
             ...new Set(

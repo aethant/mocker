@@ -3,12 +3,12 @@ import Event from "../schema/events"
 import uniq from "lodash/uniq"
 
 const dateFilters = (start, end) => ({
-  start_date: start
+  startDate: start
     ? {
         [`$gte`]: new Date(parseInt(start, 10) * 1000),
       }
     : null,
-  end_date: end ? { [`$lt`]: new Date(parseInt(end, 10) * 1000) } : null,
+  endDate: end ? { [`$lt`]: new Date(parseInt(end, 10) * 1000) } : null,
 })
 
 const trackedFilters = ids => ({
@@ -23,7 +23,7 @@ export default async (_, args, { user: { email } }) => {
     email,
   }).lean()
 
-  const { page = 1, perPage = 200, start_date, end_date } = args
+  const { page = 1, perPage = 200, startDate, endDate } = args
   const pagination =
     page && perPage
       ? {
@@ -36,8 +36,8 @@ export default async (_, args, { user: { email } }) => {
     (aggregator, key) => {
       return key !== "page" &&
         key !== "perPage" &&
-        key !== "start_date" &&
-        key !== "end_date" &&
+        key !== "startDate" &&
+        key !== "endDate" &&
         key !== "tracked"
         ? {
             ...aggregator,
@@ -53,7 +53,7 @@ export default async (_, args, { user: { email } }) => {
         : {}),
       ...(args.id || args.tracked || args.organizer
         ? {}
-        : dateFilters(start_date, end_date)),
+        : dateFilters(startDate, endDate)),
     }
   )
 
@@ -93,7 +93,7 @@ export default async (_, args, { user: { email } }) => {
     .limit(pagination.limit)
     .skip(pagination.skip)
     .lean()
-    .sort("start_date")
+    .sort("startDate")
 
   let results = data.reduce(
     (aggregator, result) => [

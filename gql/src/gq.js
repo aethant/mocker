@@ -144,10 +144,10 @@ const rootQuery = new GraphQLObjectType({
         id: {
           type: GraphQLInt,
         },
-        start_date: {
+        startDate: {
           type: GraphQLString,
         },
-        end_date: {
+        endDate: {
           type: GraphQLString,
         },
         city: {

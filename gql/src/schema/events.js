@@ -18,11 +18,11 @@ const eventSchema = new Schema({
     type: String,
     required: true,
   },
-  start_date: {
+  startDate: {
     type: Date,
     required: true,
   },
-  end_date: {
+  endDate: {
     type: Date,
   },
   city: {
@@ -38,7 +38,7 @@ const eventSchema = new Schema({
   phone: {
     type: String,
   },
-  logo_image: {
+  logoImage: {
     type: String,
     required: true,
   },
