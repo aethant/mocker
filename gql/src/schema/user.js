@@ -59,6 +59,18 @@ const userSchema = new Schema({
       type: Object,
       default: {},
     },
+    addedToFrontRush: {
+      type: Array,
+      default: [],
+    },
+    hasExported: {
+      type: Array,
+      default: [],
+    },
+    hasContacted: {
+      type: Array,
+      default: [],
+    },
   },
   schedule: {
     tracking: {

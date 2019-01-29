@@ -309,6 +309,11 @@ r.get("/delete/athletes", (req, res) => {
   return res.sendStatus(200)
 })
 
+r.delete("/delete/user", async (req, res) => {
+  User.collection.remove({})
+  return res.sendStatus(200)
+})
+
 r.get("/generate/user", async (req, res) => {
   try {
     const passwordHash = await new Promise((resolve, reject) =>
@@ -342,9 +347,12 @@ r.get("/generate/user", async (req, res) => {
       },
       athletes: {
         tagged: [],
+        addedToFrontRush: [111, 9, 7],
+        hasExported: [198, 42, 47],
+        hasContacted: [55, 22, 11, 132],
         notes: {
           8: "this is a note",
-          10: {},
+          55: "also has a note",
         },
       },
     })

@@ -82,7 +82,7 @@ export default async (context, args, { user, query }) => {
   ]
 
   const filterBase =
-    (tag && tag.length) || hasNotes
+    (tag && tag.length) || hasNotes || addedToFR || hasContacted || hasExported
       ? {
           ...lookupIdFilter,
           id: { $in: specificIdsToEvaluate },
