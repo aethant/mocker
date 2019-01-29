@@ -19,6 +19,8 @@ import User from "../schema/user"
 import Athlete from "../schema/athletes"
 import AcadType from "./acad"
 
+import data from "../data/videofeed"
+
 const AcademicScoreType = new GraphQLEnumType({
   name: "AcademicScore",
   values: {
@@ -245,14 +247,7 @@ export default new GraphQLObjectType({
       type: new GraphQLList(VideosType),
       description: "Videos/highlights to display",
       resolve: async ({ id }, args, { user: { email } }) => {
-        return [
-          {
-            label: "2018 Highlights",
-            url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            provider: 0,
-            timestamp: "1548085475",
-          },
-        ]
+        return [...data]
       },
     },
   }),
