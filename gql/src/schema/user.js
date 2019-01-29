@@ -97,6 +97,33 @@ userSchema.statics.taggedAs = async function taggedAs(email, tag) {
   })
 }
 
+userSchema.statics.addedToFrontRush = async function addedToFrontRush(
+  email,
+  athleteId
+) {
+  return await this.findOne({ email }).then(user => {
+    const { athletes: { addedToFrontRush = [] } = {} } = user
+
+    return addedToFrontRush
+  })
+}
+
+userSchema.statics.hasExported = async function hasExported(email) {
+  return await this.findOne({ email }).then(user => {
+    const { athletes: { hasExported = [198] } = {} } = user
+
+    return hasExported
+  })
+}
+
+userSchema.statics.hasContacted = async function hasContacted(email) {
+  return await this.findOne({ email }).then(user => {
+    const { athletes: { hasContacted = [111] } = {} } = user
+
+    return hasContacted
+  })
+}
+
 // retrieve athlete ids of athletes user has written notes on
 userSchema.statics.hasNotes = async function hasNotes(email, athleteId) {
   return await this.findOne({

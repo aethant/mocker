@@ -37,7 +37,15 @@ export default async (context, args, { user, query }) => {
   const lookupHasContext = Boolean(context)
   const lookupIdFilter = lookupHasContext ? getLookupId(context, query) : {}
 
-  const { page = 1, perPage, tag, hasNotes } = args
+  const {
+    page = 1,
+    perPage,
+    tag,
+    hasNotes,
+    addedToFR,
+    hasExported,
+    hasContacted,
+  } = args
   const pagination =
     page && perPage
       ? {
@@ -50,10 +58,28 @@ export default async (context, args, { user, query }) => {
     ? await User.hasNotes(user.email)
     : []
 
+  const addedToFrontRush = addedToFR
+    ? await User.addedToFrontRush(user.email)
+    : []
+
+  const athletesHasContacted = hasContacted
+    ? await User.hasContacted(user.email)
+    : []
+
+  const athletesHasExported = hasExported
+    ? await User.hasExported(user.email)
+    : []
+
   const taggedElements =
     tag && tag.length ? await User.taggedAs(user.email, tag) : []
 
-  const specificIdsToEvaluate = [...submittedNotesAthleteIds, ...taggedElements]
+  const specificIdsToEvaluate = [
+    ...submittedNotesAthleteIds,
+    ...taggedElements,
+    ...addedToFrontRush,
+    ...athletesHasContacted,
+    ...athletesHasExported,
+  ]
 
   const filterBase =
     (tag && tag.length) || hasNotes
@@ -76,7 +102,10 @@ export default async (context, args, { user, query }) => {
     return key !== "page" &&
       key !== "perPage" &&
       key !== "tag" &&
-      key !== "hasNotes"
+      key !== "hasNotes" &&
+      key !== "addedToFR" &&
+      key !== "hasExported" &&
+      key !== "hasContacted"
       ? {
           ...aggregator,
           [key]: args[key],

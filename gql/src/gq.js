@@ -93,6 +93,18 @@ const rootQuery = new GraphQLObjectType({
           description:
             "Has the user tagged this athlete with the given tag identifier(s)? (1-5)",
         },
+        addedToFR: {
+          type: GraphQLBoolean,
+          description: "Has the user added this athlete to FR?",
+        },
+        hasExported: {
+          type: GraphQLBoolean,
+          description: "Has the user exported this athlete?",
+        },
+        hasContacted: {
+          type: GraphQLBoolean,
+          description: "Has the user contacted this athlete?",
+        },
       },
       resolve: (queryContext, args, context) =>
         AthletesResolver(queryContext, args, { ...context }),
